@@ -27,7 +27,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        com.ifactory.myclassloader.App
+                                        org.example.myclassloader.App
                                     </mainClass>
                                 </manifest>
                             </archive>

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ifactory.myclassloader.beans;
+package org.example.myclassloader.beans;
 
-import com.ifactory.myclassloader.annotations.Proto;
+import org.example.myclassloader.annotations.Proto;
 import java.util.HashSet;
 import java.util.Set;
 

@@ -3,14 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ifactory.myclassloader.classloader;
+package org.example.myclassloader.classloader;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,11 +34,18 @@ public class CustomClassLoader extends ClassLoader {
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         Class<?> cl = null;
-        if (!name.startsWith("com.ifactory")) {
+        if (!name.startsWith("org.example")) {
             return cl;
         }
-        final String way = name.replace(".", "/")+".class";
-        try(final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(way);) {
+        cl = this.findLoadedClass(name);
+        if (cl != null) {
+            System.out.println("I have found class in cache");
+            return cl;
+        } else {
+            System.out.println("I load class "+name);
+        }
+        final String way = name.replace(".", "/") + ".class";
+        try (final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(way);) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
             byte[] array = new byte[1024];
             int read = 0;
@@ -49,10 +53,10 @@ public class CustomClassLoader extends ClassLoader {
                 baos.write(array, 0, read);
             }
             array = baos.toByteArray();
-            
+
             cl = defineClass(name, array, 0, array.length);
-            map.put(name, cl);
-            
+            //map.put(name, cl);
+
         } catch (FileNotFoundException ex) {
             cl = super.findClass(name);
         } catch (Throwable ex) {
@@ -63,16 +67,16 @@ public class CustomClassLoader extends ClassLoader {
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        Class<?> lookupClass = lookupClass(name);
-        if (lookupClass == null) {
-            lookupClass = findClass(name);
-            if (lookupClass!=null && resolve) {
-                resolveClass(lookupClass);
-            }
+        System.out.println("I call load for "+name);
+        Class<?> lookupClass = findClass(name);
+        if (lookupClass != null && resolve) {
+            resolveClass(lookupClass);
         }
+        //}
         if (lookupClass == null) {
             lookupClass = super.loadClass(name, resolve);
         }
         return lookupClass;
     }
+
 }
