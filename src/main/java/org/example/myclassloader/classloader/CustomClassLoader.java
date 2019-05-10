@@ -6,18 +6,14 @@
 package org.example.myclassloader.classloader;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
  * @author dnikiforov
  */
 public class CustomClassLoader extends ClassLoader {
-
-    private static final Map<String, Class<?>> map = new ConcurrentHashMap<>();
 
     public CustomClassLoader(ClassLoader cl) {
         super(cl);
@@ -27,23 +23,7 @@ public class CustomClassLoader extends ClassLoader {
         super();
     }
 
-    private Class<?> lookupClass(String name) {
-        return map.get(name);
-    }
-
-    @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
-        Class<?> cl = null;
-        if (!name.startsWith("org.example")) {
-            return cl;
-        }
-        cl = this.findLoadedClass(name);
-        if (cl != null) {
-            System.out.println("I have found class in cache");
-            return cl;
-        } else {
-            System.out.println("I load class "+name);
-        }
+    private byte[] getClassData(String name) throws IOException {
         final String way = name.replace(".", "/") + ".class";
         try (final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(way);) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
@@ -53,30 +33,31 @@ public class CustomClassLoader extends ClassLoader {
                 baos.write(array, 0, read);
             }
             array = baos.toByteArray();
+            return array;
+        }    
+    }
 
+    
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        Class<?> cl = null;
+        if (!name.startsWith("org.example")) {
+            throw new ClassNotFoundException(name);
+        }
+        final String way = name.replace(".", "/") + ".class";
+        try (final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(way);) {
+            byte[] array = getClassData(name);
             cl = defineClass(name, array, 0, array.length);
-            //map.put(name, cl);
-
-        } catch (FileNotFoundException ex) {
-            cl = super.findClass(name);
         } catch (Throwable ex) {
-            throw new RuntimeException(ex);
+            throw new ClassNotFoundException(name, ex);
         }
         return cl;
     }
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        System.out.println("I call load for "+name);
-        Class<?> lookupClass = findClass(name);
-        if (lookupClass != null && resolve) {
-            resolveClass(lookupClass);
-        }
-        //}
-        if (lookupClass == null) {
-            lookupClass = super.loadClass(name, resolve);
-        }
-        return lookupClass;
+        Class<?> cl = super.loadClass(name, resolve);
+        return cl;
     }
 
 }

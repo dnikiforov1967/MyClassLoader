@@ -6,8 +6,7 @@
 package org.example.myclassloader;
 
 import org.example.myclassloader.beans.BeanX;
-import org.example.myclassloader.beans.BeanY;
-import org.example.myclassloader.beans.ProtoThread;
+import org.example.myclassloader.classloader.CustomClassLoader;
 
 /**
  *
@@ -15,18 +14,18 @@ import org.example.myclassloader.beans.ProtoThread;
  */
 public class App {
     
-    public static void main(String... args) throws InterruptedException {
+    public static void main(String... args) throws InterruptedException, ClassNotFoundException {
         final ClassLoader defaultClassLoader = ClassLoader.getSystemClassLoader();
         System.out.println("System classloader : "+defaultClassLoader.getClass());
         System.out.println("Parent classloader : "+defaultClassLoader.getParent().getClass());
+        System.out.println("Parent of parent classloader : "+defaultClassLoader.getParent().getParent().getClass());
         System.out.println("Thread classloader : "+Thread.currentThread().getContextClassLoader().getClass());
         System.out.println("This class classloader : "+App.class.getClassLoader().getClass());
 
-        BeanX beanX = new BeanX();
-        System.out.println("BeanX Class class loader : "+beanX.getClass().getClassLoader().getClass());
-        ProtoThread pt = new ProtoThread();
-        pt.start();
-        pt.join();
+        //BeanX beanX = new BeanX();
+        ClassLoader cloader = new CustomClassLoader(defaultClassLoader.getParent().getParent());
+        final Class<?> cl = cloader.loadClass("org.example.myclassloader.beans.BeanX");
+        System.out.println("BeanX Class class loader : "+cl.getClassLoader().getClass());
         
     }
     
