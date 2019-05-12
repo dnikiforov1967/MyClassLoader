@@ -7,10 +7,8 @@ package org.example.myclassloader.beans;
 
 /**
  *
- * @author dnikiforov
+ * @author dima
  */
-public class BeanY {
-    
-    private BeanX beanX = new BeanX();
+public class B {
     
 }

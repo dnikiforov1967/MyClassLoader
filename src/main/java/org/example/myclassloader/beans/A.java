@@ -5,15 +5,13 @@
  */
 package org.example.myclassloader.beans;
 
+import org.example.myclassloader.annotations.Proto;
+
 /**
  *
  * @author dnikiforov
  */
-public class ProtoThread extends Thread {
-
-    @Override
-    public void run() {
-        BeanY beanY = new BeanY();
-    }
+@Proto
+public class A {
     
 }

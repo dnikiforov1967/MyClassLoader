@@ -5,7 +5,8 @@
  */
 package org.example.myclassloader;
 
-import org.example.myclassloader.beans.BeanX;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.example.myclassloader.classloader.CustomClassLoader;
 
 /**
@@ -14,18 +15,19 @@ import org.example.myclassloader.classloader.CustomClassLoader;
  */
 public class App {
     
-    public static void main(String... args) throws InterruptedException, ClassNotFoundException {
-        final ClassLoader defaultClassLoader = ClassLoader.getSystemClassLoader();
-        System.out.println("System classloader : "+defaultClassLoader.getClass());
-        System.out.println("Parent classloader : "+defaultClassLoader.getParent().getClass());
-        System.out.println("Parent of parent classloader : "+defaultClassLoader.getParent().getParent().getClass());
-        System.out.println("Thread classloader : "+Thread.currentThread().getContextClassLoader().getClass());
-        System.out.println("This class classloader : "+App.class.getClassLoader().getClass());
+    public static void main(String... args) throws InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+        ClassLoader extentionClassLoader = ClassLoader.getSystemClassLoader();
+        while(extentionClassLoader.getParent()!=null) {
+            extentionClassLoader = extentionClassLoader.getParent();
+        }
 
-        //BeanX beanX = new BeanX();
-        ClassLoader cloader = new CustomClassLoader(defaultClassLoader.getParent().getParent());
-        final Class<?> cl = cloader.loadClass("org.example.myclassloader.beans.BeanX");
-        System.out.println("BeanX Class class loader : "+cl.getClassLoader().getClass());
+        CustomClassLoader cloader = new CustomClassLoader(extentionClassLoader);
+        cloader.postConstruct();
+        final Class<?> serverClass = cloader.loadClass("org.example.myclassloader.beans.Server");
+        System.out.println("Server Class class loader : "+serverClass.getClassLoader().getClass());
+        final Object serverObject = serverClass.newInstance();
+        final Method runMethod = serverClass.getMethod("run", String[].class);
+        runMethod.invoke(serverObject, (Object)args);
         
     }
     

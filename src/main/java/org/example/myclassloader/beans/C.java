@@ -9,9 +9,9 @@ import org.example.myclassloader.annotations.Proto;
 
 /**
  *
- * @author dnikiforov
+ * @author dima
  */
 @Proto
-public class BeanX {
+public class C {
     
 }
